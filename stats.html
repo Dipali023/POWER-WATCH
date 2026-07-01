@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PowerWatch | Statistics</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div class="logo">&#9889; PowerWatch</div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="log.html">Log Outage</a>
+    <a href="feed.html">Live Feed</a>
+    <a href="stats.html">Statistics</a>
+    <a href="about.html">About</a>
+  </nav>
+</header>
+
+<main>
+  <h1>Statistics</h1>
+  <p class="subtitle">Patterns pulled from every outage reported so far.</p>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="label">Total outages</div>
+      <div class="value" id="statTotal">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Most-affected area</div>
+      <div class="value" id="statTopArea" style="font-size:1.15rem;">&mdash;</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Average duration</div>
+      <div class="value" id="statAvgDuration" style="font-size:1.3rem;">&mdash;</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Currently ongoing</div>
+      <div class="value" id="statOngoing">0</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom: 24px;">
+    <h2 style="margin-top:0;">Outages by area</h2>
+    <div id="areaBars"></div>
+    <div class="empty-state" id="areaEmpty" style="display:none;">No data yet. Report an outage to see it here.</div>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0;">Outages by day of week</h2>
+    <div id="dayBars"></div>
+    <div class="empty-state" id="dayEmpty" style="display:none;">No data yet. Report an outage to see it here.</div>
+  </div>
+</main>
+
+<footer>PowerWatch &mdash; a community outage reporter. Data is stored locally in your browser.</footer>
+
+<script src="storage.js"></script>
+<script>
+  function renderStats() {
+    const outages = pwGetOutages();
+    const resolved = outages.filter((o) => o.status === "resolved");
+    const ongoing = outages.filter((o) => o.status === "ongoing");
+
+    document.getElementById("statTotal").textContent = outages.length;
+    document.getElementById("statOngoing").textContent = ongoing.length;
+
+    // Most-affected area
+    const areaCounts = {};
+    outages.forEach((o) => {
+      areaCounts[o.area] = (areaCounts[o.area] || 0) + 1;
+    });
+    const areaEntries = Object.entries(areaCounts).sort((a, b) => b[1] - a[1]);
+    document.getElementById("statTopArea").textContent =
+      areaEntries.length > 0 ? areaEntries[0][0] : "\u2014";
+
+    // Average duration
+    if (resolved.length > 0) {
+      const totalMs = resolved.reduce(
+        (sum, o) => sum + (new Date(o.endTime) - new Date(o.startTime)),
+        0
+      );
+      document.getElementById("statAvgDuration").textContent = pwFormatDuration(
+        totalMs / resolved.length
+      );
+    } else {
+      document.getElementById("statAvgDuration").textContent = "\u2014";
+    }
+
+    // Bars by area
+    const areaBarsEl = document.getElementById("areaBars");
+    const areaEmptyEl = document.getElementById("areaEmpty");
+    areaBarsEl.innerHTML = "";
+    if (areaEntries.length === 0) {
+      areaEmptyEl.style.display = "block";
+    } else {
+      areaEmptyEl.style.display = "none";
+      const maxCount = areaEntries[0][1];
+      areaEntries.forEach(([area, count]) => {
+        const pct = Math.round((count / maxCount) * 100);
+        const row = document.createElement("div");
+        row.className = "bar-row";
+        row.innerHTML = `
+          <div class="area-label" title="${pwEscapeHtml(area)}">${pwEscapeHtml(area)}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+          <div class="count">${count}</div>
+        `;
+        areaBarsEl.appendChild(row);
+      });
+    }
+
+    // Bars by day of week
+    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const dayCounts = [0, 0, 0, 0, 0, 0, 0];
+    outages.forEach((o) => {
+      const day = new Date(o.startTime).getDay();
+      dayCounts[day]++;
+    });
+    const dayBarsEl = document.getElementById("dayBars");
+    const dayEmptyEl = document.getElementById("dayEmpty");
+    dayBarsEl.innerHTML = "";
+    const maxDayCount = Math.max(...dayCounts);
+    if (maxDayCount === 0) {
+      dayEmptyEl.style.display = "block";
+    } else {
+      dayEmptyEl.style.display = "none";
+      dayNames.forEach((name, i) => {
+        const pct = Math.round((dayCounts[i] / maxDayCount) * 100);
+        const row = document.createElement("div");
+        row.className = "bar-row";
+        row.innerHTML = `
+          <div class="area-label">${name}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+          <div class="count">${dayCounts[i]}</div>
+        `;
+        dayBarsEl.appendChild(row);
+      });
+    }
+  }
+
+  renderStats();
+</script>
+</body>
+</html>

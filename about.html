@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PowerWatch | About</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div class="logo">&#9889; PowerWatch</div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="log.html">Log Outage</a>
+    <a href="feed.html">Live Feed</a>
+    <a href="stats.html">Statistics</a>
+    <a href="about.html">About</a>
+  </nav>
+</header>
+
+<main>
+  <h1>About PowerWatch</h1>
+  <p class="subtitle">Why this exists, and what it solves.</p>
+
+  <div class="card" style="margin-bottom: 20px;">
+    <h2 style="margin-top:0;">The problem</h2>
+    <p style="color:var(--muted); line-height:1.7;">
+      Power cuts in many localities are frequent but completely undocumented. When the power
+      goes out, residents can't easily tell if it's just their house or the whole street.
+      Nobody tracks which areas or times see the most outages, so patterns that are obvious
+      over months stay invisible day to day. And without any record, there's nothing concrete
+      to bring to the electricity board when it's time to complain.
+    </p>
+  </div>
+
+  <div class="card" style="margin-bottom: 20px;">
+    <h2 style="margin-top:0;">How PowerWatch helps</h2>
+    <ul style="color:var(--muted); line-height:1.8; padding-left: 20px;">
+      <li><strong>Real-time confirmation</strong> &mdash; if several people in the same area log an outage within minutes, everyone knows instantly it isn't just them.</li>
+      <li><strong>Pattern visibility</strong> &mdash; the Statistics page turns scattered individual reports into visible trends by area and day.</li>
+      <li><strong>Accountability data</strong> &mdash; a simple, concrete record to bring to the people responsible for fixing it.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0;">A note on this prototype</h2>
+    <p style="color:var(--muted); line-height:1.7;">
+      This version saves data in your browser's LocalStorage, so it's fully functional but
+      only visible on your own device &mdash; it's a working proof of concept, not yet a shared
+      community tool. A real deployment would need a shared backend (for example Firebase, or
+      a small Node.js service with a database) so that everyone in a locality sees the same
+      live feed and statistics.
+    </p>
+  </div>
+</main>
+
+<footer>PowerWatch &mdash; a community outage reporter. Data is stored locally in your browser.</footer>
+
+<script src="storage.js"></script>
+</body>
+</html>

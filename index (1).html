@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PowerWatch | Home</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div class="logo">&#9889; PowerWatch</div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="log.html">Log Outage</a>
+    <a href="feed.html">Live Feed</a>
+    <a href="stats.html">Statistics</a>
+    <a href="about.html">About</a>
+  </nav>
+</header>
+
+<main>
+  <div class="hero">
+    <h1>Track power cuts in your area.</h1>
+    <p>See patterns other residents can't see. Get accountability data you can actually bring to your electricity provider.</p>
+    <div class="btn-row">
+      <button onclick="location.href='log.html'">Report an Outage</button>
+      <button class="ghost" onclick="location.href='feed.html'">View Live Feed</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0;">How it works</h2>
+    <p style="color:var(--muted); line-height:1.6;">
+      When the power goes out, log it in seconds &mdash; just the area and a start time.
+      When it comes back, mark it resolved and the duration is calculated automatically.
+      Over time, the <a href="stats.html">Statistics</a> page turns these individual reports
+      into visible patterns: which areas are hit most, and when.
+    </p>
+  </div>
+</main>
+
+<footer>PowerWatch &mdash; a community outage reporter. Data is stored locally in your browser.</footer>
+
+<script src="storage.js"></script>
+</body>
+</html>

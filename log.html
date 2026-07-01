@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PowerWatch | Log Outage</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div class="logo">&#9889; PowerWatch</div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="log.html">Log Outage</a>
+    <a href="feed.html">Live Feed</a>
+    <a href="stats.html">Statistics</a>
+    <a href="about.html">About</a>
+  </nav>
+</header>
+
+<main>
+  <h1>Report an outage</h1>
+  <p class="subtitle">Log it the moment it starts. You can mark it resolved later from the Live Feed page.</p>
+
+  <div class="card">
+    <form id="outageForm" novalidate>
+      <div class="field">
+        <label for="area">Area / locality name</label>
+        <input type="text" id="area" placeholder="e.g. Sector 12, Green Park Colony">
+        <div class="error-msg" id="areaError"></div>
+      </div>
+
+      <div class="field">
+        <label for="note">Note (optional)</label>
+        <textarea id="note" placeholder="Anything worth noting, e.g. 'whole street affected'"></textarea>
+      </div>
+
+      <button type="submit">Submit Report</button>
+      <div class="status-msg" id="statusMsg"></div>
+    </form>
+  </div>
+</main>
+
+<footer>PowerWatch &mdash; a community outage reporter. Data is stored locally in your browser.</footer>
+
+<script src="storage.js"></script>
+<script>
+  document.getElementById("outageForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const areaInput = document.getElementById("area");
+    const noteInput = document.getElementById("note");
+    const areaError = document.getElementById("areaError");
+    const statusMsg = document.getElementById("statusMsg");
+
+    const area = areaInput.value.trim();
+    const note = noteInput.value.trim();
+
+    areaInput.classList.remove("invalid");
+    areaError.textContent = "";
+    statusMsg.className = "status-msg";
+    statusMsg.textContent = "";
+
+    if (!area) {
+      areaError.textContent = "Area name is required.";
+      areaInput.classList.add("invalid");
+      return;
+    }
+
+    pwAddOutage(area, note);
+
+    statusMsg.textContent = "Outage reported. View it on the Live Feed page.";
+    statusMsg.classList.add("success");
+
+    this.reset();
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PowerWatch | Live Feed</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div class="logo">&#9889; PowerWatch</div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="log.html">Log Outage</a>
+    <a href="feed.html">Live Feed</a>
+    <a href="stats.html">Statistics</a>
+    <a href="about.html">About</a>
+  </nav>
+</header>
+
+<main>
+  <h1>Live feed</h1>
+  <p class="subtitle">All reported outages, newest first.</p>
+
+  <div class="toolbar">
+    <input type="text" id="searchBox" placeholder="Search by area...">
+    <select id="areaFilter">
+      <option value="">All areas</option>
+    </select>
+    <select id="statusFilter">
+      <option value="">All statuses</option>
+      <option value="ongoing">Ongoing</option>
+      <option value="resolved">Resolved</option>
+    </select>
+  </div>
+
+  <div id="list"></div>
+  <div class="empty-state" id="emptyState" style="display:none;">
+    No outages match right now. <a href="log.html">Report one</a> to get started.
+  </div>
+</main>
+
+<footer>PowerWatch &mdash; a community outage reporter. Data is stored locally in your browser.</footer>
+
+<script src="storage.js"></script>
+<script>
+  function populateAreaFilter() {
+    const outages = pwGetOutages();
+    const areas = [...new Set(outages.map((o) => o.area))].sort();
+    const select = document.getElementById("areaFilter");
+    select.innerHTML = '<option value="">All areas</option>';
+    areas.forEach((area) => {
+      const opt = document.createElement("option");
+      opt.value = area;
+      opt.textContent = area;
+      select.appendChild(opt);
+    });
+  }
+
+  function renderFeed() {
+    const outages = pwGetOutages().slice().reverse();
+    const search = document.getElementById("searchBox").value.trim().toLowerCase();
+    const areaFilter = document.getElementById("areaFilter").value;
+    const statusFilter = document.getElementById("statusFilter").value;
+
+    const filtered = outages.filter((o) => {
+      const matchesSearch = !search || o.area.toLowerCase().includes(search);
+      const matchesArea = !areaFilter || o.area === areaFilter;
+      const matchesStatus = !statusFilter || o.status === statusFilter;
+      return matchesSearch && matchesArea && matchesStatus;
+    });
+
+    const list = document.getElementById("list");
+    const emptyState = document.getElementById("emptyState");
+    list.innerHTML = "";
+
+    if (filtered.length === 0) {
+      emptyState.style.display = "block";
+      return;
+    }
+    emptyState.style.display = "none";
+
+    filtered.forEach((o) => {
+      const card = document.createElement("div");
+      card.className = "outage-card";
+
+      const badgeClass = o.status === "ongoing" ? "ongoing" : "resolved";
+      const badgeText = o.status === "ongoing" ? "Ongoing" : "Resolved";
+
+      let durationHtml = "";
+      if (o.status === "resolved") {
+        const ms = new Date(o.endTime) - new Date(o.startTime);
+        durationHtml = `<div class="time">Resolved after ${pwFormatDuration(ms)}</div>`;
+      }
+
+      card.innerHTML = `
+        <div class="outage-info">
+          <div class="area">${pwEscapeHtml(o.area)}</div>
+          ${o.note ? `<div class="note">${pwEscapeHtml(o.note)}</div>` : ""}
+          <div class="time">Started ${pwFormatTime(o.startTime)}</div>
+          ${durationHtml}
+        </div>
+        <div class="outage-actions">
+          <span class="badge ${badgeClass}">${badgeText}</span>
+        </div>
+      `;
+
+      if (o.status === "ongoing") {
+        const btn = document.createElement("button");
+        btn.className = "small";
+        btn.textContent = "Mark Resolved";
+        btn.addEventListener("click", () => {
+          pwResolveOutage(o.id);
+          renderFeed();
+        });
+        card.querySelector(".outage-actions").appendChild(btn);
+      }
+
+      list.appendChild(card);
+    });
+  }
+
+  populateAreaFilter();
+  renderFeed();
+
+  document.getElementById("searchBox").addEventListener("input", renderFeed);
+  document.getElementById("areaFilter").addEventListener("change", renderFeed);
+  document.getElementById("statusFilter").addEventListener("change", renderFeed);
+</script>
+</body>
+</html>
